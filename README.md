@@ -15,11 +15,31 @@
 |cbert+finetune|0.7820|0.9481|0.6722|0.7867|
 |roberta+finetune|0.774|**0.9604**|0.6488|0.7745|
 |plome+finetune|**0.7920**|0.9493|**0.6890**|**0.7984**|
+|cbert+finetune+v2|0.78|0.9355|0.6789|0.7868|
+|plome+fintune+v2|0.774|0.9306|0.6722|0.7806|
+|Corpus500 Error|||||
+|cbert+finetune|0.67|1.0|0.6689|0.8016|
+|plome+finetune|0.6867|0.9952|0.6890|0.8142|
+|cbert+finetune+v2|0.6767|0.9951|0.6789|0.8072|
+|plome+finetune+v2|0.67|0.9950|0.6722|0.8024|
 |Sighan15|||||
-|macbert/csc||0.8254|0.7311|0.7754|
+|macbert/csc||0.8254|**0.7311**|**0.7754**|
 |cbert+finetune|0.7627|0.8322|0.6494|0.7295|
+|plome+finetune|0.7445|0.8283|0.6063|0.7001|
+|cbert+finetune+v2|**0.7995**|**0.8527**|0.7071|0.7725|
+|plome+finetune+v2|0.7736|0.8427|0.6636|0.7425|
 
 > 这里算的是句子级别的指标。
+
+**\*\*\*\*\* New 2022-03-01: 加入更多数据进行finetune \*\*\*\*\***
+
+加入了cbert+finetune+v2模型的评测，v2的话主要是训练数据做了更新，加入了更多的wiki-edit数据，以及[Wang271K](https://github.com/wdimmy/Automatic-Corpus-Generation)的数据集。在sighan15测试集上比原来的好很多，在corpus500上与原来差不多。
+
+corpus500后面有些数据没有做纠错，因此重新测试了一下包含errors的数据，plome+finetune的效果还是最好的。
+
+plome在v2数据上进行finetune效果没有cbert好，只是相比原来在sighan15上效果有提升。
+
+**\*\*\*\*\* Update End \*\*\*\*\***
 
 可以看到其实语料作用挺大的，单纯用roberta进行finetune的效果就好过了macbert/csc了。
 
@@ -34,6 +54,20 @@ Sighan15上效果不如macbert/csc，可能主要的原因是cbert没有用[Wang
 针对1-1形式的纠错，包括音近、音同、形近字的纠错。
 
 ### Demo
+
+**\*\*\*\*\* New 2022-03-01: 开源cbert_v2模型 \*\*\*\*\***
+
+cbert+finetune+v2模型开源地址：
+
+[链接，密码: 6arq](https://pan.baidu.com/s/1RO4DC16fF-Umyp39N6UiRg)
+
+在使用时需要将CBert的cbert参数改为False:
+
+`model = cbert.CBert(bert_config,tie_embedding=True,cbert=False)`
+
+> 相比plome+finetune模型，这个模型在sighan上效果好一些，但是测试下来感觉偏保守一些。
+
+**\*\*\*\*\* Update End \*\*\*\*\***
 
 plome+finetune的模型开源出来供大家测试：
 

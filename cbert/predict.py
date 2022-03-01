@@ -73,9 +73,10 @@ def convert_single_example(text,tokenizer,max_seq_len):
 
 
 max_seq_len = 128
-model_save_path = '/nfs/users/xueyou/data/speller/cbert/models/finetune_plome_cbert/cbert'
+model_save_path = '/data/xueyou/data/speller/cbert/finetune_plome_cbert_v2/cbert'
+# model_save_path = '/nfs/users/xueyou/data/speller/cbert/models/finetune_plome_cbert/cbert'
 tokenizer = tokenization.SimpleTokenizer('assets/vocab.txt')
-bert_config = modeling.BertConfig.from_json_file('/data/xueyou/data/bert_pretrain/chinese_roberta_wwm_ext_L-12_H-768_A-12/bert_config.json')
+bert_config = modeling.BertConfig.from_json_file('assets/bert_config.json')
 
 input_ids = tf.placeholder(tf.int32,[None,None])
 input_mask = tf.placeholder(tf.int32,[None,None])
@@ -102,6 +103,8 @@ saver.restore(sess, model_save_path)
 
 def eval_corpus_500_score():
     corpus = json.load(open('/nfs/users/xueyou/github/pycorrector/pycorrector/data/eval_corpus.json'))
+    # corpus = [json.loads(x) for x in open('/nfs/users/xueyou/data/speller/pairs/testset/sighan15_test.jsonl')]
+    
     TP = 0.0
     FP = 0.0
     FN = 0.0
@@ -110,6 +113,8 @@ def eval_corpus_500_score():
     for data_dict in tqdm(corpus):
         src = text = data_dict.get('text', '').lower().replace(' ','')
         tgt = data_dict.get('correction', '').lower().replace(' ','')
+        if not data_dict.get('errors',[]):
+            continue
 
         tokens,text_len,_input_ids,_input_mask,_segment_ids = convert_single_example(text,tokenizer,max_seq_len)
         _pred_probs = sess.run(probs,feed_dict={input_ids:_input_ids,input_mask:_input_mask,segment_ids:_segment_ids})
@@ -128,6 +133,16 @@ def eval_corpus_500_score():
             print(tgt)
             print(tgt_pred)
             raise
+
+        diff_pp = ''
+        for a,b in dmp.diff_main(src,tgt_pred):
+            if a == 0:
+                diff_pp += b
+            if a == -1:
+                diff_pp += '\033[1;31m' + b + '\033[0m'
+            if a == 1:
+                diff_pp += '\033[1;32m' + b + '\033[0m'
+
         # 负样本
         if src == tgt:
             # 预测也为负
@@ -136,6 +151,8 @@ def eval_corpus_500_score():
             # 预测为正
             else:
                 FP += 1
+                # print(f'FP:\n{src}\n{tgt}\n{diff_pp}')
+                # input('continue?')
         # 正样本
         else:
             # 预测也为正
@@ -144,6 +161,9 @@ def eval_corpus_500_score():
             # 预测为负
             else:
                 FN += 1
+                # print(f'FN:\n{src}\n{tgt}\n{diff_pp}')
+                # input('continue?')
+
         total_num += 1
     acc = (TP + TN) / total_num
     precision = TP / (TP + FP) if TP > 0 else 0.0

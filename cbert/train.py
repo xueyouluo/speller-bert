@@ -130,15 +130,33 @@ def main(_):
 
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
-        if hvd:
-            sess.run(hvd.broadcast_global_variables(0))
+        
 
-        saver = tf.train.Saver(var_list = tf.trainable_variables(),max_to_keep=5)
 
         loss_values = []
         start_time = time.time()
         model_path = os.path.join(FLAGS.output_dir, 'cbert') 
-        for step in range(FLAGS.num_train_steps):
+        start_step = 0
+        saver = None
+        if os.path.exists(FLAGS.output_dir):
+            checkpoint = tf.train.latest_checkpoint(FLAGS.output_dir)
+            if checkpoint:
+                tf.logging.info(f'restore model from {checkpoint}')
+                start_step = int(checkpoint.split('-')[-1])
+                global_step = tf.train.get_or_create_global_step()
+                saver = tf.train.Saver(var_list = tf.trainable_variables(),max_to_keep=5)
+                saver.restore(sess,checkpoint)
+                sess.run(tf.assign(global_step,start_step))
+        
+        if saver is None:
+            saver = tf.train.Saver(var_list = tf.trainable_variables(),max_to_keep=5)
+
+
+
+        if hvd:
+            sess.run(hvd.broadcast_global_variables(0))
+
+        for step in range(start_step,FLAGS.num_train_steps):
             _,train_loss,train_acc = sess.run([train_op,loss,accuracy[1]])
             loss_values.append(train_loss)
             if master and step % 50 == 0:
