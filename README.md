@@ -31,6 +31,16 @@
 
 > 这里算的是句子级别的指标。
 
+**\*\*\*\*\* New 2022-03-07 \*\*\*\*\***
+
+加入原来没有放出来的数据：
+
+- dimsim_confusion.json: [链接，密码: fn7v](https://pan.baidu.com/s/1_dKEIvH-9dAje5SOcfG1sQ)
+  - 这是用dimsim在通用语料上找的音近词，质量一般。如果有同学要预训练cbert这块可以加上。
+- 从维基百科中抽取的1-1的纠错语料：[下载地址+密码: c4qk](https://pan.baidu.com/s/1PovlwB9H1Zu-Jv_WN9xZnQ)
+  - 这部分数据有噪声，建议用混淆集做个过滤再使用。拿任何一个预训练模型直接finetune后效果就还不错了。
+  - 参考[wiki-error-extract](https://github.com/xueyouluo/wiki-error-extract)
+
 **\*\*\*\*\* New 2022-03-01: 加入更多数据进行finetune \*\*\*\*\***
 
 加入了cbert+finetune+v2模型的评测，v2的话主要是训练数据做了更新，加入了更多的wiki-edit数据，以及[Wang271K](https://github.com/wdimmy/Automatic-Corpus-Generation)的数据集。在sighan15测试集上比原来的好很多，在corpus500上与原来差不多。
@@ -101,7 +111,7 @@ plome+finetune的模型开源出来供大家测试：
 finetune的数据采用了：
 
 - [wiki-error-extract](https://github.com/xueyouluo/wiki-error-extract)的方法从维基百科的编辑历史中收集到的平行语料（维基历史数据太大，我只抽取了部分），同时用混淆集对错误进行了过滤
-- 开源的中文纠错数据集，比如nlpcc，sighan的训练数据，只保留`len(src)==len(tgt)`的数据
+- [开源的中文纠错数据集](https://github.com/shibing624/pycorrector#Dataset)，比如nlpcc，sighan的训练数据，只保留`len(src)==len(tgt)`的数据
 - 部分我们自己收集的错误平行数据，量较少
 
 总共468K的平行语料，对前面预训练的模型进行了finetune。
